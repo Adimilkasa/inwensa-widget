@@ -1,32 +1,44 @@
 (function() {
+  var WINDCHAT_WIDGET_VERSION = '2026-01-15.1';
+  if (typeof window !== 'undefined') {
+    if (window.__windchatWidgetLoaded) {
+      return;
+    }
+    window.__windchatWidgetLoaded = true;
+    window.WINDCHAT_WIDGET_VERSION = WINDCHAT_WIDGET_VERSION;
+    try {
+      console.info('[windchat] loaded', WINDCHAT_WIDGET_VERSION);
+    } catch (e) {}
+  }
+
   var html = `
 <div id="windchat-root" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; position: fixed; bottom: 0; right: 0; z-index: 9999;">
   
   <!-- FLOATING ACTION BUTTONS -->
-  <div class="floating-actions">
-    <button class="floating-action-btn" id="windchat-btn-chat" data-action="chat" aria-label="Czat z doradcą turbin wiatrowych">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <div class="floating-actions floating-actions--stack" aria-label="Skróty Windchat">
+    <button class="floating-action-btn floating-actions__btn floating-actions__btn--chat" id="windchat-btn-chat" data-action="chat" aria-label="Czat z doradcą turbin wiatrowych">
+      <svg class="floating-actions__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
       </svg>
-      <span class="floating-action-label">Czat</span>
+      <span class="floating-action-label floating-actions__label" aria-hidden="true">Czat</span>
     </button>
 
-    <button class="floating-action-btn" id="windchat-btn-spec" data-action="spec" aria-label="Pobierz specyfikację turbiny wiatrowej">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <button class="floating-action-btn floating-actions__btn floating-actions__btn--spec" id="windchat-btn-spec" data-action="spec" aria-label="Pobierz specyfikację turbiny wiatrowej">
+      <svg class="floating-actions__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
         <polyline points="14 2 14 8 20 8"></polyline>
         <line x1="12" y1="11" x2="12" y2="17"></line>
         <line x1="9" y1="14" x2="15" y2="14"></line>
       </svg>
-      <span class="floating-action-label">Specyfikacja</span>
+      <span class="floating-action-label floating-actions__label" aria-hidden="true">Specyfikacja</span>
     </button>
 
-    <button class="floating-action-btn" id="windchat-btn-offer" data-action="offer" aria-label="Pobierz spersonalizowaną ofertę">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <button class="floating-action-btn floating-actions__btn floating-actions__btn--offer" id="windchat-btn-offer" data-action="offer" aria-label="Pobierz spersonalizowaną ofertę">
+      <svg class="floating-actions__icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
         <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
         <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
       </svg>
-      <span class="floating-action-label">Oferta</span>
+      <span class="floating-action-label floating-actions__label" aria-hidden="true">Oferta</span>
     </button>
   </div>
 
@@ -35,18 +47,58 @@
     
     <!-- HEADER -->
     <div id="windchat-header">
-      <div>
-        <div class="windchat-header-brand">Doradca Turbin Wiatrowych</div>
-        <div class="windchat-header-subtitle">INWENSA</div>
+      <div class="windchat-header-left">
+        <div class="windchat-header-icon" aria-hidden="true">
+          <svg class="windchat-header-icon-svg windchat-header-icon-svg--chat" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <svg class="windchat-header-icon-svg windchat-header-icon-svg--spec" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="11" x2="12" y2="17"></line>
+            <line x1="9" y1="14" x2="15" y2="14"></line>
+          </svg>
+          <svg class="windchat-header-icon-svg windchat-header-icon-svg--offer" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+        </div>
+        <div class="windchat-header-text">
+          <div class="windchat-header-brand" id="windchat-header-title">Czat</div>
+          <div class="windchat-header-subtitle">INWENSA</div>
+        </div>
       </div>
       <button id="windchat-close" aria-label="Zamknij czat">✕</button>
     </div>
 
     <!-- TABS -->
     <div id="windchat-tabs">
-      <button class="windchat-tab windchat-tab-active" data-tab="chat">Czat</button>
-      <button class="windchat-tab" data-tab="spec">Spec</button>
-      <button class="windchat-tab" data-tab="offer">Oferta</button>
+      <button class="windchat-tab windchat-tab-active" data-tab="chat" aria-label="Zakładka: Czat">
+        <span class="windchat-tab__icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </span>
+        <span class="windchat-tab__text">Czat</span>
+      </button>
+      <button class="windchat-tab" data-tab="spec" aria-label="Zakładka: Specyfikacja">
+        <span class="windchat-tab__icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+        </span>
+        <span class="windchat-tab__text">Spec</span>
+      </button>
+      <button class="windchat-tab" data-tab="offer" aria-label="Zakładka: Oferta">
+        <span class="windchat-tab__icon" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+        </span>
+        <span class="windchat-tab__text">Oferta</span>
+      </button>
     </div>
 
     <!-- TAB 1: CHAT -->
@@ -127,18 +179,19 @@
   color: var(--primary-color);
 }
 
-.floating-actions {
+#windchat-root .floating-actions {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 9998;
+  z-index: 9999;
   display: flex;
   flex-direction: column;
   gap: 12px;
   align-items: flex-end;
 }
 
-.floating-action-btn {
+#windchat-root .floating-actions__btn,
+#windchat-root .floating-action-btn {
   all: unset;
   position: relative;
   display: flex;
@@ -160,7 +213,8 @@
   font-weight: 500;
 }
 
-.floating-action-btn:hover {
+#windchat-root .floating-actions__btn:hover,
+#windchat-root .floating-action-btn:hover {
   background: rgba(10, 14, 20, 0.72);
   border-color: rgba(182, 255, 46, 0.65);
   box-shadow: 0 0 0 2px rgba(182, 255, 46, 0.35), 0 0 22px rgba(182, 255, 46, 0.28);
@@ -168,24 +222,28 @@
   transform: translateX(-4px) scale(1.03);
 }
 
-.floating-action-btn:active {
+#windchat-root .floating-actions__btn:active,
+#windchat-root .floating-action-btn:active {
   transform: translateX(-4px) scale(0.98);
 }
 
-.floating-action-btn:focus-visible {
+#windchat-root .floating-actions__btn:focus-visible,
+#windchat-root .floating-action-btn:focus-visible {
   outline: none;
   border-color: rgba(182, 255, 46, 0.65);
   box-shadow: 0 0 0 2px rgba(182, 255, 46, 0.35), 0 0 22px rgba(182, 255, 46, 0.28);
 }
 
-.floating-action-btn.is-active {
+#windchat-root .floating-actions__btn.is-active,
+#windchat-root .floating-action-btn.is-active {
   background: rgba(10, 14, 20, 0.72);
   border-color: rgba(182, 255, 46, 0.65);
   color: #B6FF2E;
   box-shadow: 0 0 0 2px rgba(182, 255, 46, 0.35), 0 0 22px rgba(182, 255, 46, 0.28);
 }
 
-.floating-action-label {
+#windchat-root .floating-actions__label,
+#windchat-root .floating-action-label {
   position: absolute;
   right: 100%;
   top: 50%;
@@ -208,22 +266,29 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .floating-action-btn {
+  #windchat-root .floating-actions__btn,
+  #windchat-root .floating-action-btn {
     transition: none;
   }
-  .floating-action-label {
+  #windchat-root .floating-actions__label,
+  #windchat-root .floating-action-label {
+    transition: none;
+  }
+  #windchat-panel {
     transition: none;
   }
 }
 
 @media (min-width: 641px) {
-  .floating-action-btn:hover .floating-action-label {
+  #windchat-root .floating-actions__btn:hover .floating-actions__label,
+  #windchat-root .floating-action-btn:hover .floating-action-label {
     display: block;
     opacity: 1;
     transform: translateY(-50%) translateX(0);
   }
   
-  .floating-action-btn:focus-visible .floating-action-label {
+  #windchat-root .floating-actions__btn:focus-visible .floating-actions__label,
+  #windchat-root .floating-action-btn:focus-visible .floating-action-label {
     display: block;
     opacity: 1;
     transform: translateY(-50%) translateX(0);
@@ -231,19 +296,21 @@
 }
 
 @media (max-width: 640px) {
-  .floating-action-btn {
+  #windchat-root .floating-actions__btn,
+  #windchat-root .floating-action-btn {
     width: 48px;
     height: 48px;
     font-size: 18px;
   }
   
-  .floating-actions {
+  #windchat-root .floating-actions {
     bottom: 16px;
     right: 16px;
     gap: 10px;
   }
   
-  .floating-action-label {
+  #windchat-root .floating-actions__label,
+  #windchat-root .floating-action-label {
     display: none !important;
   }
 }
@@ -264,19 +331,19 @@
   flex-direction: column;
   overflow: hidden;
   z-index: 9999;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: opacity 180ms ease, transform 180ms ease;
 }
 
 #windchat-panel.windchat-hidden {
   opacity: 0;
   pointer-events: none;
-  transform: scale(0.9) translateY(20px);
+  transform: translateY(12px);
 }
 
 #windchat-panel.open {
   opacity: 1;
   pointer-events: all;
-  transform: scale(1) translateY(0);
+  transform: translateY(0);
 }
 
 @media (max-width: 768px) {
@@ -305,6 +372,46 @@
   padding: 16px;
   background: rgba(14, 18, 26, 0.70);
   border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.windchat-header-left {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.windchat-header-icon {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.80);
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+}
+
+.windchat-header-icon-svg {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+#windchat-panel[data-tab="chat"] .windchat-header-icon-svg--chat,
+#windchat-panel[data-tab="spec"] .windchat-header-icon-svg--spec,
+#windchat-panel[data-tab="offer"] .windchat-header-icon-svg--offer {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.windchat-header-text {
+  display: flex;
+  flex-direction: column;
 }
 
 .windchat-header-brand {
@@ -370,6 +477,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+}
+
+.windchat-tab__icon {
+  display: inline-flex;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.windchat-tab__text {
+  line-height: 1;
 }
 
 .windchat-tab:hover {
@@ -378,9 +495,13 @@
 }
 
 .windchat-tab.windchat-tab-active {
-  color: var(--primary-color);
+  color: rgba(255, 255, 255, 0.92);
   border-bottom-color: var(--primary-color);
   background: rgba(182, 255, 46, 0.05);
+}
+
+.windchat-tab.windchat-tab-active .windchat-tab__icon {
+  color: var(--primary-color);
 }
 
 .windchat-tab-content {
@@ -782,6 +903,17 @@
 
     function switchTab(tabName) {
       currentTab = tabName;
+
+      if (panel) {
+        panel.setAttribute('data-tab', tabName);
+      }
+
+      var headerTitle = document.getElementById('windchat-header-title');
+      if (headerTitle) {
+        if (tabName === 'chat') headerTitle.textContent = 'Czat';
+        else if (tabName === 'spec') headerTitle.textContent = 'Specyfikacja';
+        else if (tabName === 'offer') headerTitle.textContent = 'Oferta';
+      }
       
       document.querySelectorAll('.windchat-tab').forEach(function (t) {
         t.classList.remove('windchat-tab-active');
@@ -809,6 +941,8 @@
         }
       });
     }
+
+    switchTab(currentTab || 'chat');
 
     function openPanel() {
       opened = true;
