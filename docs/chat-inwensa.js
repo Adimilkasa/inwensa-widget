@@ -837,6 +837,80 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* --- OPTION 2: pill buttons with visible labels (override) --- */
+#windchat-root .floating-action-btn,
+#windchat-root .floating-actions__btn {
+  all: unset;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  height: 48px;
+  padding: 0 16px;
+  width: auto;
+  border-radius: 14px;
+  background: rgba(10, 14, 20, 0.72);
+  border: 1px solid rgba(182, 255, 46, 0.45);
+  color: #EAF7E6;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  font-weight: 600;
+}
+
+#windchat-root .floating-action-btn .floating-actions__icon,
+#windchat-root .floating-actions__btn .floating-actions__icon,
+#windchat-root .floating-action-btn svg,
+#windchat-root .floating-actions__btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+#windchat-root .floating-action-label,
+#windchat-root .floating-actions__label {
+  position: static;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+#windchat-root .floating-action-btn:hover,
+#windchat-root .floating-actions__btn:hover {
+  box-shadow: 0 0 0 2px rgba(182, 255, 46, 0.25), 0 0 18px rgba(182, 255, 46, 0.18);
+  transform: translateX(-2px);
+}
+
+#windchat-root .floating-action-btn:active,
+#windchat-root .floating-actions__btn:active {
+  transform: translateX(-2px) scale(0.98);
+}
+
+@media (max-width: 640px) {
+  #windchat-root .floating-action-btn,
+  #windchat-root .floating-actions__btn {
+    height: 44px;
+    padding: 0 14px;
+    border-radius: 12px;
+  }
+  #windchat-root .floating-action-label,
+  #windchat-root .floating-actions__label {
+    font-size: 13px;
+  }
+}
   `;
 
   var style = document.createElement('style');
