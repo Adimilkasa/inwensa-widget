@@ -114,7 +114,7 @@
     <div id="windchat-spec-content" class="windchat-tab-content">
       <div class="windchat-form-head">
         <div class="windchat-form-title">Pobierz Specyfikację Techniczną</div>
-        <div class="windchat-form-help">Otrzymaj szczegółowe specyfikacje techniczne dla Twojego projektu turbiny wiatrowej</div>
+        <div class="windchat-form-help">Otrzymaj szczegółową specyfikacje techniczną turbiny wiatrowej</div>
       </div>
       <div class="windchat-lead-grid">
         <input id="windchat-spec-name" placeholder="Twoje Imię" />
@@ -132,7 +132,7 @@
     <div id="windchat-offer-content" class="windchat-tab-content">
       <div class="windchat-form-head">
         <div class="windchat-form-title">Poproś o Spersonalizowaną Ofertę</div>
-        <div class="windchat-form-help">Opowiedz nam o swoim projekcie, otrzymaj spersonalizowaną ofertę</div>
+        <div class="windchat-form-help">Skorzystaj z przygotowania spersonalizowanej oferty, która uwzględnia dobór urządzenia , możliwości techniczne oraz dotację z programu MEW</div>
       </div>
       <div class="windchat-lead-grid">
         <input id="windchat-offer-name" placeholder="Twoje Imię" />
