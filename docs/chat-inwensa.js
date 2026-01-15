@@ -108,6 +108,25 @@
   --text-secondary: #B0B0B0;
 }
 
+/* Basic reset to reduce Wix theme interference */
+#windchat-root, #windchat-root * {
+  box-sizing: border-box;
+}
+
+#windchat-root button,
+#windchat-root input,
+#windchat-root textarea {
+  font-family: inherit;
+}
+
+#windchat-root svg {
+  display: block;
+}
+
+#windchat-root a {
+  color: var(--primary-color);
+}
+
 .floating-actions {
   position: fixed;
   bottom: 24px;
@@ -707,7 +726,7 @@
   container.innerHTML = html;
   document.body.appendChild(container);
 
-  var apiBaseUrl = 'https://asia-travelers-priorities-blogs.trycloudflare.com';
+  var apiBaseUrl = (window.WINDCHAT_API_BASE_URL || 'https://asia-travelers-priorities-blogs.trycloudflare.com').replace(/\/$/, '');
   var minResponseDelayMs = 5000;
   
   var opened = false;
@@ -882,17 +901,21 @@
           }, waitMs);
         })
         .catch(function (err) {
-          var elapsed = Date.now() - sentAt;
-          var waitMs = Math.max(0, minResponseDelayMs - elapsed);
-          window.setTimeout(function () {
-            if (typing && typing.bubble) {
-              typing.bubble.classList.remove('windchat-typing');
-              typing.bubble.textContent = 'Błąd: ' + err.message;
-            } else {
-              addMsg('assistant', 'Błąd: ' + err.message);
-            }
-            send.disabled = false;
-          }, waitMs);
+          console.error('WindChat: /api/chat request failed', err);
+
+          var msg = String((err && err.message) || err || '');
+          var looksLikeNetwork = /Failed to fetch|NetworkError|ERR_NAME_NOT_RESOLVED|ENOTFOUND/i.test(msg);
+          var friendly = looksLikeNetwork
+            ? 'Brak połączenia z serwerem czatu. Jeśli to Wix: ustaw window.WINDCHAT_API_BASE_URL na poprawny adres backendu.'
+            : ('Błąd: ' + msg);
+
+          if (typing && typing.bubble) {
+            typing.bubble.classList.remove('windchat-typing');
+            typing.bubble.textContent = friendly;
+          } else {
+            addMsg('assistant', friendly);
+          }
+          send.disabled = false;
         });
     }
 
