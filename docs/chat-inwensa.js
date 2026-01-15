@@ -1,5 +1,8 @@
-(function() {
-  var html = `
+<!-- ============================================
+     WINDCHAT WIDGET - COMPLETE CODE FOR WIX
+     Skopiuj całość do Custom Code Element na Wix
+     ============================================ -->
+
 <div id="windchat-root" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; position: fixed; bottom: 0; right: 0; z-index: 9999;">
   
   <!-- FLOATING ACTION BUTTONS -->
@@ -97,9 +100,11 @@
   </div>
 
 </div>
-  `;
 
-  var styles = `
+<!-- ============================================ 
+     STYLES - GLASSMORPHISM DESIGN
+     ============================================ -->
+<style>
 #windchat-root {
   --primary-color: #B6FF2E;
   --bg-dark: rgba(10, 10, 15, 0.95);
@@ -108,6 +113,7 @@
   --text-secondary: #B0B0B0;
 }
 
+/* FLOATING ACTION BUTTONS */
 .floating-actions {
   position: fixed;
   bottom: 24px;
@@ -229,6 +235,7 @@
   }
 }
 
+/* PANEL */
 #windchat-panel {
   position: fixed;
   bottom: 90px;
@@ -279,6 +286,7 @@
   }
 }
 
+/* HEADER */
 #windchat-header {
   display: flex;
   justify-content: space-between;
@@ -327,6 +335,7 @@
   box-shadow: 0 0 12px rgba(182, 255, 46, 0.20);
 }
 
+/* TABS */
 #windchat-tabs {
   display: flex;
   background: rgba(0, 0, 0, 0.2);
@@ -364,6 +373,7 @@
   background: rgba(182, 255, 46, 0.05);
 }
 
+/* TAB CONTENT */
 .windchat-tab-content {
   display: none;
   flex: 1;
@@ -381,6 +391,7 @@
   gap: 12px;
 }
 
+/* MESSAGES */
 #windchat-messages {
   flex: 1;
   overflow-y: auto;
@@ -495,6 +506,7 @@
   }
 }
 
+/* COMPOSER */
 #windchat-composer {
   display: flex;
   gap: 8px;
@@ -559,6 +571,7 @@
   cursor: not-allowed;
 }
 
+/* FORMS */
 .windchat-form-head {
   margin-bottom: 16px;
   padding-bottom: 12px;
@@ -697,19 +710,12 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
-  `;
+</style>
 
-  var style = document.createElement('style');
-  style.textContent = styles;
-  document.head.appendChild(style);
-
-  var container = document.createElement('div');
-  container.innerHTML = html;
-  document.body.appendChild(container);
-
+<script>
+(function() {
   var apiBaseUrl = 'https://asia-travelers-priorities-blogs.trycloudflare.com';
   var minResponseDelayMs = 5000;
-  
   var opened = false;
   var engaged = false;
   var hasWelcomed = false;
@@ -756,33 +762,23 @@
     var input = document.getElementById('windchat-input');
     var send = document.getElementById('windchat-send');
 
-    if (!btnChat) {
-      setTimeout(initWidget, 100);
-      return;
-    }
-
     function switchTab(tabName) {
       currentTab = tabName;
-      
       document.querySelectorAll('.windchat-tab').forEach(function (t) {
         t.classList.remove('windchat-tab-active');
         if (t.getAttribute('data-tab') === tabName) {
           t.classList.add('windchat-tab-active');
         }
       });
-
       var chatContent = document.getElementById('windchat-chat-content');
       var specContent = document.getElementById('windchat-spec-content');
       var offerContent = document.getElementById('windchat-offer-content');
-
       [chatContent, specContent, offerContent].forEach(function (el) {
         el.classList.remove('windchat-tab-active');
       });
-
       if (tabName === 'chat') chatContent.classList.add('windchat-tab-active');
       else if (tabName === 'spec') specContent.classList.add('windchat-tab-active');
       else if (tabName === 'offer') offerContent.classList.add('windchat-tab-active');
-
       document.querySelectorAll('.floating-action-btn').forEach(function (btn) {
         btn.classList.remove('is-active');
         if (btn.getAttribute('data-action') === tabName) {
@@ -795,7 +791,6 @@
       opened = true;
       panel.classList.remove('windchat-hidden');
       panel.classList.add('open');
-      
       if (!engaged) {
         engaged = true;
         if (!hasWelcomed) {
@@ -811,43 +806,17 @@
       panel.classList.add('windchat-hidden');
     }
 
-    btnChat.addEventListener('click', function () {
-      switchTab('chat');
-      openPanel();
-    });
-
-    btnSpec.addEventListener('click', function () {
-      switchTab('spec');
-      openPanel();
-    });
-
-    btnOffer.addEventListener('click', function () {
-      switchTab('offer');
-      openPanel();
-    });
-
-    document.querySelectorAll('.windchat-tab').forEach(function (tabBtn) {
-      tabBtn.addEventListener('click', function () {
-        switchTab(this.getAttribute('data-tab'));
-      });
-    });
-
-    close.addEventListener('click', closePanel);
-
     function addMsg(role, text, meta) {
       var row = document.createElement('div');
       row.className = 'windchat-msg windchat-' + role;
-      
       var bubble = document.createElement('div');
       bubble.className = 'windchat-bubble';
-      
       if (meta && meta.typing) {
         bubble.classList.add('windchat-typing');
         bubble.innerHTML = '<span class="windchat-dots"><span></span><span></span><span></span></span>';
       } else {
         bubble.textContent = text;
       }
-      
       row.appendChild(bubble);
       messages.appendChild(row);
       messages.scrollTop = messages.scrollHeight;
@@ -858,10 +827,8 @@
       if (!text) return;
       engaged = true;
       addMsg('user', text);
-
       var typing = addMsg('assistant', '', { typing: true });
       var sentAt = Date.now();
-
       send.disabled = true;
       postJson(apiBaseUrl + '/api/chat', {
         sessionId: sessionId,
@@ -896,12 +863,30 @@
         });
     }
 
+    btnChat.addEventListener('click', function () {
+      switchTab('chat');
+      openPanel();
+    });
+    btnSpec.addEventListener('click', function () {
+      switchTab('spec');
+      openPanel();
+    });
+    btnOffer.addEventListener('click', function () {
+      switchTab('offer');
+      openPanel();
+    });
+    document.querySelectorAll('.windchat-tab').forEach(function (tabBtn) {
+      tabBtn.addEventListener('click', function () {
+        switchTab(this.getAttribute('data-tab'));
+      });
+    });
+    close.addEventListener('click', closePanel);
+
     send.addEventListener('click', function () {
       var text = input.value.trim();
       input.value = '';
       sendMessage(text);
     });
-
     input.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -918,7 +903,6 @@
         var phone = document.getElementById('windchat-spec-phone').value.trim();
         var email = document.getElementById('windchat-spec-email').value.trim();
         var consent = document.getElementById('windchat-spec-consent').checked;
-
         if (!email) {
           addMsg('assistant', 'Email jest wymagany do wysłania specyfikacji.');
           switchTab('chat');
@@ -934,10 +918,8 @@
           switchTab('chat');
           return;
         }
-
         specSubmit.disabled = true;
         specSubmit.textContent = 'Wysyłam…';
-
         postJson(apiBaseUrl + '/api/send-spec', {
           email: email,
           name: name || undefined,
@@ -970,34 +952,28 @@
         var phone = document.getElementById('windchat-offer-phone').value.trim();
         var email = document.getElementById('windchat-offer-email').value.trim();
         var consent = document.getElementById('windchat-offer-consent').checked;
-
         if (!consent) {
           addMsg('assistant', 'Musisz wyrazić zgodę na kontakt aby kontynuować żądanie oferty.');
           switchTab('chat');
           return;
         }
-
         if (!phone || !email) {
           addMsg('assistant', 'Podaj telefon i email – oba są wymagane.');
           switchTab('chat');
           return;
         }
-
         if (!isEmail(email)) {
           addMsg('assistant', 'Format emaila wygląda na niepoprawny.');
           switchTab('chat');
           return;
         }
-
         if (!isPhoneLikely(phone)) {
           addMsg('assistant', 'Podaj proszę pełny numer telefonu.');
           switchTab('chat');
           return;
         }
-
         offerSubmit.disabled = true;
         offerSubmit.textContent = 'Wysyłam…';
-
         postJson(apiBaseUrl + '/api/leads', {
           sessionId: sessionId,
           name: name || undefined,
@@ -1032,3 +1008,4 @@
     initWidget();
   }
 })();
+</script>
