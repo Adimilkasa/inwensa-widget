@@ -1,106 +1,123 @@
-/**
- * INWENSA Wind Turbine Advisor Widget
- * Self-contained chat widget for Wix integration
- * Load this file from GitHub Pages on Wix
- * 
- * Usage: Add to Wix Custom Code (Head):
- * <script src="https://adimilkasa.github.io/inwensa-widget/chat-inwensa.js"></script>
- */
+<!-- ============================================
+     WINDCHAT WIDGET - COMPLETE CODE FOR WIX
+     Skopiuj całość do Custom Code Element na Wix
+     ============================================ -->
 
-(function() {
-  // ============================================
-  // CONFIGURATION
-  // ============================================
-  var apiBaseUrl = 'https://asia-travelers-priorities-blogs.trycloudflare.com';
-  var minResponseDelayMs = 5000;
-  var brandName = 'Doradca Turbin Wiatrowych';
-  var brandSubtitle = 'INWENSA';
-  var privacyUrl = 'https://inwensa.pl/privacy';
+<div id="windchat-root" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; position: fixed; bottom: 0; right: 0; z-index: 9999;">
+  
+  <!-- FLOATING ACTION BUTTONS -->
+  <div class="floating-actions">
+    <button class="floating-action-btn" id="windchat-btn-chat" data-action="chat" aria-label="Czat z doradcą turbin wiatrowych">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+      <span class="floating-action-label">Czat</span>
+    </button>
 
-  // ============================================
-  // STATE VARIABLES
-  // ============================================
-  var opened = false;
-  var engaged = false;
-  var hasWelcomed = false;
-  var currentTab = 'chat';
+    <button class="floating-action-btn" id="windchat-btn-spec" data-action="spec" aria-label="Pobierz specyfikację turbiny wiatrowej">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="12" y1="11" x2="12" y2="17"></line>
+        <line x1="9" y1="14" x2="15" y2="14"></line>
+      </svg>
+      <span class="floating-action-label">Specyfikacja</span>
+    </button>
 
-  // Get or create session ID
-  var sessionId = window.localStorage.getItem('windchat_sessionId');
-  if (!sessionId) {
-    sessionId = 'sess_' + Math.random().toString(36).slice(2) + '_' + Date.now();
-    window.localStorage.setItem('windchat_sessionId', sessionId);
-  }
+    <button class="floating-action-btn" id="windchat-btn-offer" data-action="offer" aria-label="Pobierz spersonalizowaną ofertę">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+      </svg>
+      <span class="floating-action-label">Oferta</span>
+    </button>
+  </div>
 
-  // ============================================
-  // HELPER FUNCTIONS
-  // ============================================
-  function isEmail(s) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s || '').trim());
-  }
-
-  function isPhoneLikely(s) {
-    var v = String(s || '').replace(/\s+/g, '').replace(/[-()]/g, '');
-    return v.length >= 7;
-  }
-
-  function postJson(url, payload) {
-    return fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).then(function (r) {
-      return r.json().then(function (j) {
-        if (!r.ok) {
-          var msg = (j && (j.error || j.message)) || ('HTTP ' + r.status);
-          throw new Error(msg);
-        }
-        return j;
-      });
-    });
-  }
-
-  // ============================================
-  // DOM CREATION FUNCTIONS
-  // ============================================
-
-  function createSVG(pathD) {
-    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', '24');
-    svg.setAttribute('height', '24');
-    svg.setAttribute('viewBox', '0 0 24 24');
-    svg.setAttribute('fill', 'none');
-    svg.setAttribute('stroke', 'currentColor');
-    svg.setAttribute('stroke-width', '2');
-    svg.setAttribute('stroke-linecap', 'round');
-    svg.setAttribute('stroke-linejoin', 'round');
+  <!-- MAIN WIDGET PANEL -->
+  <div id="windchat-panel" class="windchat-hidden">
     
-    var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', pathD);
-    svg.appendChild(path);
-    return svg;
-  }
+    <!-- HEADER -->
+    <div id="windchat-header">
+      <div>
+        <div class="windchat-header-brand">Doradca Turbin Wiatrowych</div>
+        <div class="windchat-header-subtitle">INWENSA</div>
+      </div>
+      <button id="windchat-close" aria-label="Zamknij czat">✕</button>
+    </div>
 
-  function injectStyles() {
-    var style = document.createElement('style');
-    style.textContent = `
+    <!-- TABS -->
+    <div id="windchat-tabs">
+      <button class="windchat-tab windchat-tab-active" data-tab="chat">Czat</button>
+      <button class="windchat-tab" data-tab="spec">Spec</button>
+      <button class="windchat-tab" data-tab="offer">Oferta</button>
+    </div>
+
+    <!-- TAB 1: CHAT -->
+    <div id="windchat-chat-content" class="windchat-tab-content windchat-tab-active">
+      <div id="windchat-messages"></div>
+      <div id="windchat-composer">
+        <textarea id="windchat-input" rows="1" placeholder="Napisz wiadomość…"></textarea>
+        <button id="windchat-send">Wyślij</button>
+      </div>
+    </div>
+
+    <!-- TAB 2: SPECIFICATION -->
+    <div id="windchat-spec-content" class="windchat-tab-content">
+      <div class="windchat-form-head">
+        <div class="windchat-form-title">Pobierz Specyfikację Techniczną</div>
+        <div class="windchat-form-help">Otrzymaj szczegółowe specyfikacje techniczne dla Twojego projektu turbiny wiatrowej</div>
+      </div>
+      <div class="windchat-lead-grid">
+        <input id="windchat-spec-name" placeholder="Twoje Imię" />
+        <input id="windchat-spec-phone" placeholder="Telefon (wymagane)" required />
+        <input id="windchat-spec-email" placeholder="Email (wymagane)" required />
+      </div>
+      <label class="windchat-consent">
+        <input id="windchat-spec-consent" type="checkbox" required />
+        <span>Wyrażam zgodę na otrzymanie specyfikacji na moją skrzynkę email i akceptuję <a href="https://inwensa.pl/privacy" class="windchat-link" target="_blank" rel="noopener noreferrer">politykę prywatności</a></span>
+      </label>
+      <button id="windchat-spec-submit" type="button" class="windchat-form-submit">Pobierz Specyfikację</button>
+    </div>
+
+    <!-- TAB 3: OFFER -->
+    <div id="windchat-offer-content" class="windchat-tab-content">
+      <div class="windchat-form-head">
+        <div class="windchat-form-title">Poproś o Spersonalizowaną Ofertę</div>
+        <div class="windchat-form-help">Opowiedz nam o swoim projekcie, otrzymaj spersonalizowaną ofertę</div>
+      </div>
+      <div class="windchat-lead-grid">
+        <input id="windchat-offer-name" placeholder="Twoje Imię" />
+        <input id="windchat-offer-phone" placeholder="Telefon (wymagane)" required />
+        <input id="windchat-offer-email" placeholder="Email (wymagane)" required />
+      </div>
+      <label class="windchat-consent">
+        <input id="windchat-offer-consent" type="checkbox" required />
+        <span>Wyrażam zgodę na kontakt w sprawie mojej oferty i akceptuję <a href="https://inwensa.pl/privacy" class="windchat-link" target="_blank" rel="noopener noreferrer">politykę prywatności</a></span>
+      </label>
+      <button id="windchat-offer-submit" type="button" class="windchat-form-submit">Poproś o Ofertę</button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ============================================ 
+     STYLES - GLASSMORPHISM DESIGN
+     ============================================ -->
+<style>
 #windchat-root {
   --primary-color: #B6FF2E;
   --bg-dark: rgba(10, 10, 15, 0.95);
   --border-light: rgba(255, 255, 255, 0.1);
   --text-light: #FFFFFF;
   --text-secondary: #B0B0B0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  position: fixed;
-  bottom: 0;
-  right: 0;
-  z-index: 9999;
 }
 
+/* FLOATING ACTION BUTTONS */
 .floating-actions {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 24px;
+  right: 24px;
   z-index: 9998;
   display: flex;
   flex-direction: column;
@@ -110,59 +127,97 @@
 
 .floating-action-btn {
   all: unset;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
   padding: 0;
   width: 52px;
   height: 52px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(182, 255, 46, 0.15), rgba(182, 255, 46, 0.05));
-  border: 1.5px solid rgba(182, 255, 46, 0.3);
-  color: var(--primary-color);
+  border-radius: 999px;
+  background: rgba(10, 14, 20, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #EAF7E6;
   cursor: pointer;
   font-size: 22px;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: all 160ms ease;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   font-weight: 500;
 }
 
 .floating-action-btn:hover {
-  background: linear-gradient(135deg, rgba(182, 255, 46, 0.25), rgba(182, 255, 46, 0.1));
-  border-color: rgba(182, 255, 46, 0.5);
-  box-shadow: 0 12px 48px rgba(182, 255, 46, 0.2);
-  transform: translateY(-4px);
+  background: rgba(10, 14, 20, 0.72);
+  border-color: rgba(182, 255, 46, 0.65);
+  box-shadow: 0 0 0 2px rgba(182, 255, 46, 0.35), 0 0 22px rgba(182, 255, 46, 0.28);
+  color: #B6FF2E;
+  transform: translateX(-4px) scale(1.03);
 }
 
 .floating-action-btn:active {
-  transform: translateY(-2px);
+  transform: translateX(-4px) scale(0.98);
+}
+
+.floating-action-btn:focus-visible {
+  outline: none;
+  border-color: rgba(182, 255, 46, 0.65);
+  box-shadow: 0 0 0 2px rgba(182, 255, 46, 0.35), 0 0 22px rgba(182, 255, 46, 0.28);
 }
 
 .floating-action-btn.is-active {
-  background: linear-gradient(135deg, rgba(182, 255, 46, 0.25), rgba(182, 255, 46, 0.15));
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-  box-shadow: 0 12px 48px rgba(182, 255, 46, 0.25);
+  background: rgba(10, 14, 20, 0.72);
+  border-color: rgba(182, 255, 46, 0.65);
+  color: #B6FF2E;
+  box-shadow: 0 0 0 2px rgba(182, 255, 46, 0.35), 0 0 22px rgba(182, 255, 46, 0.28);
 }
 
 .floating-action-label {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
   display: none;
+  margin-right: 12px;
+  padding: 10px 12px;
+  background: rgba(10, 14, 20, 0.70);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   font-size: 12px;
+  font-weight: 600;
   white-space: nowrap;
-  font-weight: 500;
-  color: var(--text-light);
+  color: #FFFFFF;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease, transform 200ms ease;
 }
 
-@media (min-width: 768px) {
-  .floating-action-btn:hover .floating-action-label {
-    display: inline;
+@media (prefers-reduced-motion: reduce) {
+  .floating-action-btn {
+    transition: none;
+  }
+  .floating-action-label {
+    transition: none;
   }
 }
 
-@media (max-width: 480px) {
+@media (min-width: 641px) {
+  .floating-action-btn:hover .floating-action-label {
+    display: block;
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+  
+  .floating-action-btn:focus-visible .floating-action-label {
+    display: block;
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+@media (max-width: 640px) {
   .floating-action-btn {
     width: 48px;
     height: 48px;
@@ -174,20 +229,25 @@
     right: 16px;
     gap: 10px;
   }
+  
+  .floating-action-label {
+    display: none !important;
+  }
 }
 
+/* PANEL */
 #windchat-panel {
   position: fixed;
   bottom: 90px;
   right: 20px;
   width: 400px;
   max-height: 600px;
-  background: var(--bg-dark);
-  border: 1px solid var(--border-light);
-  border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(10, 14, 20, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(182, 255, 46, 0.10) inset, 0 0 24px rgba(182, 255, 46, 0.16);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -226,25 +286,26 @@
   }
 }
 
+/* HEADER */
 #windchat-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: linear-gradient(135deg, rgba(182, 255, 46, 0.05), rgba(76, 175, 80, 0.05));
-  border-bottom: 1px solid var(--border-light);
+  background: rgba(14, 18, 26, 0.70);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
 }
 
 .windchat-header-brand {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-light);
+  color: rgba(255, 255, 255, 0.90);
   letter-spacing: 0.3px;
 }
 
 .windchat-header-subtitle {
   font-size: 11px;
-  color: var(--primary-color);
+  color: rgba(255, 255, 255, 0.65);
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 1px;
@@ -259,19 +320,22 @@
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.70);
   cursor: pointer;
   font-size: 18px;
   font-weight: bold;
-  transition: all 0.2s ease;
+  transition: all 150ms ease;
 }
 
 #windchat-close:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-light);
+  border-color: rgba(182, 255, 46, 0.50);
+  color: rgba(255, 255, 255, 0.90);
+  box-shadow: 0 0 12px rgba(182, 255, 46, 0.20);
 }
 
+/* TABS */
 #windchat-tabs {
   display: flex;
   background: rgba(0, 0, 0, 0.2);
@@ -309,6 +373,7 @@
   background: rgba(182, 255, 46, 0.05);
 }
 
+/* TAB CONTENT */
 .windchat-tab-content {
   display: none;
   flex: 1;
@@ -326,6 +391,7 @@
   gap: 12px;
 }
 
+/* MESSAGES */
 #windchat-messages {
   flex: 1;
   overflow-y: auto;
@@ -440,6 +506,7 @@
   }
 }
 
+/* COMPOSER */
 #windchat-composer {
   display: flex;
   gap: 8px;
@@ -476,22 +543,23 @@
 #windchat-send {
   all: unset;
   padding: 10px 16px;
-  background: linear-gradient(135deg, rgba(182, 255, 46, 0.15), rgba(182, 255, 46, 0.05));
-  border: 1px solid rgba(182, 255, 46, 0.3);
-  border-radius: 8px;
-  color: var(--primary-color);
+  background: linear-gradient(180deg, rgba(182, 255, 46, 0.25), rgba(182, 255, 46, 0.10));
+  border: 1px solid rgba(182, 255, 46, 0.45);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.92);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 150ms ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 #windchat-send:hover:not(:disabled) {
-  background: linear-gradient(135deg, rgba(182, 255, 46, 0.25), rgba(182, 255, 46, 0.1));
-  border-color: var(--primary-color);
-  box-shadow: 0 4px 16px rgba(182, 255, 46, 0.2);
+  background: linear-gradient(180deg, rgba(182, 255, 46, 0.30), rgba(182, 255, 46, 0.15));
+  border-color: rgba(182, 255, 46, 0.65);
+  box-shadow: 0 0 20px rgba(182, 255, 46, 0.20);
+  transform: translateY(-1px);
 }
 
 #windchat-send:active:not(:disabled) {
@@ -503,6 +571,7 @@
   cursor: not-allowed;
 }
 
+/* FORMS */
 .windchat-form-head {
   margin-bottom: 16px;
   padding-bottom: 12px;
@@ -531,25 +600,25 @@
 
 .windchat-lead-grid input {
   all: unset;
-  padding: 10px 12px;
+  padding: 12px 14px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-light);
-  border-radius: 8px;
-  color: var(--text-light);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 14px;
+  color: rgba(255, 255, 255, 0.90);
   font-size: 13px;
   font-family: inherit;
-  transition: all 0.2s ease;
+  transition: all 150ms ease;
 }
 
 .windchat-lead-grid input::placeholder {
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .windchat-lead-grid input:focus {
   outline: none;
   background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(182, 255, 46, 0.3);
-  box-shadow: 0 0 12px rgba(182, 255, 46, 0.1);
+  border-color: rgba(182, 255, 46, 0.55);
+  box-shadow: 0 0 0 3px rgba(182, 255, 46, 0.18);
 }
 
 .windchat-consent {
@@ -611,15 +680,15 @@
 
 .windchat-form-submit {
   all: unset;
-  padding: 10px 16px;
-  background: linear-gradient(135deg, rgba(182, 255, 46, 0.2), rgba(182, 255, 46, 0.1));
-  border: 1px solid rgba(182, 255, 46, 0.3);
-  border-radius: 8px;
-  color: var(--primary-color);
+  padding: 12px 18px;
+  background: linear-gradient(180deg, rgba(182, 255, 46, 0.25), rgba(182, 255, 46, 0.10));
+  border: 1px solid rgba(182, 255, 46, 0.45);
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.92);
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 150ms ease;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   width: 100%;
@@ -627,9 +696,10 @@
 }
 
 .windchat-form-submit:hover:not(:disabled) {
-  background: linear-gradient(135deg, rgba(182, 255, 46, 0.3), rgba(182, 255, 46, 0.15));
-  border-color: var(--primary-color);
-  box-shadow: 0 4px 16px rgba(182, 255, 46, 0.15);
+  background: linear-gradient(180deg, rgba(182, 255, 46, 0.30), rgba(182, 255, 46, 0.15));
+  border-color: rgba(182, 255, 46, 0.65);
+  box-shadow: 0 0 28px rgba(182, 255, 46, 0.22);
+  transform: translateY(-1px);
 }
 
 .windchat-form-submit:active:not(:disabled) {
@@ -640,275 +710,66 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
-    `;
-    document.head.appendChild(style);
+</style>
+
+<!-- ============================================ 
+     JAVASCRIPT - WIDGET LOGIC
+     ============================================ -->
+<script>
+(function() {
+  // Configuration
+  var apiBaseUrl = 'https://asia-travelers-priorities-blogs.trycloudflare.com';
+  var minResponseDelayMs = 5000;
+  
+  var opened = false;
+  var engaged = false;
+  var hasWelcomed = false;
+  var currentTab = 'chat';
+
+  // Get Session ID
+  var sessionId = window.localStorage.getItem('windchat_sessionId');
+  if (!sessionId) {
+    sessionId = 'sess_' + Math.random().toString(36).slice(2) + '_' + Date.now();
+    window.localStorage.setItem('windchat_sessionId', sessionId);
   }
 
-  function createDOM() {
-    // Create root container
-    var root = document.createElement('div');
-    root.id = 'windchat-root';
-
-    // Floating actions container
-    var floatingActions = document.createElement('div');
-    floatingActions.className = 'floating-actions';
-
-    // Chat button
-    var btnChat = document.createElement('button');
-    btnChat.className = 'floating-action-btn';
-    btnChat.id = 'windchat-btn-chat';
-    btnChat.setAttribute('data-action', 'chat');
-    btnChat.setAttribute('aria-label', 'Czat z doradcą turbin wiatrowych');
-    btnChat.appendChild(createSVG('M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'));
-    var chatLabel = document.createElement('span');
-    chatLabel.className = 'floating-action-label';
-    chatLabel.textContent = 'Czat';
-    btnChat.appendChild(chatLabel);
-
-    // Spec button
-    var btnSpec = document.createElement('button');
-    btnSpec.className = 'floating-action-btn';
-    btnSpec.id = 'windchat-btn-spec';
-    btnSpec.setAttribute('data-action', 'spec');
-    btnSpec.setAttribute('aria-label', 'Pobierz specyfikację turbiny wiatrowej');
-    btnSpec.appendChild(createSVG('M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'));
-    var specSvg = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-    specSvg.setAttribute('points', '14 2 14 8 20 8');
-    btnSpec.querySelector('svg').appendChild(specSvg);
-    var specL1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    specL1.setAttribute('x1', '12');
-    specL1.setAttribute('y1', '11');
-    specL1.setAttribute('x2', '12');
-    specL1.setAttribute('y2', '17');
-    btnSpec.querySelector('svg').appendChild(specL1);
-    var specL2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    specL2.setAttribute('x1', '9');
-    specL2.setAttribute('y1', '14');
-    specL2.setAttribute('x2', '15');
-    specL2.setAttribute('y2', '14');
-    btnSpec.querySelector('svg').appendChild(specL2);
-    var specLabel = document.createElement('span');
-    specLabel.className = 'floating-action-label';
-    specLabel.textContent = 'Specyfikacja';
-    btnSpec.appendChild(specLabel);
-
-    // Offer button
-    var btnOffer = document.createElement('button');
-    btnOffer.className = 'floating-action-btn';
-    btnOffer.id = 'windchat-btn-offer';
-    btnOffer.setAttribute('data-action', 'offer');
-    btnOffer.setAttribute('aria-label', 'Pobierz spersonalizowaną ofertę');
-    var offerSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    offerSvg.setAttribute('width', '24');
-    offerSvg.setAttribute('height', '24');
-    offerSvg.setAttribute('viewBox', '0 0 24 24');
-    offerSvg.setAttribute('fill', 'none');
-    offerSvg.setAttribute('stroke', 'currentColor');
-    offerSvg.setAttribute('stroke-width', '2');
-    offerSvg.setAttribute('stroke-linecap', 'round');
-    offerSvg.setAttribute('stroke-linejoin', 'round');
-    var offerRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    offerRect.setAttribute('x', '2');
-    offerRect.setAttribute('y', '7');
-    offerRect.setAttribute('width', '20');
-    offerRect.setAttribute('height', '14');
-    offerRect.setAttribute('rx', '2');
-    offerRect.setAttribute('ry', '2');
-    offerSvg.appendChild(offerRect);
-    var offerPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    offerPath.setAttribute('d', 'M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16');
-    offerSvg.appendChild(offerPath);
-    btnOffer.appendChild(offerSvg);
-    var offerLabel = document.createElement('span');
-    offerLabel.className = 'floating-action-label';
-    offerLabel.textContent = 'Oferta';
-    btnOffer.appendChild(offerLabel);
-
-    floatingActions.appendChild(btnChat);
-    floatingActions.appendChild(btnSpec);
-    floatingActions.appendChild(btnOffer);
-
-    // Main panel
-    var panel = document.createElement('div');
-    panel.id = 'windchat-panel';
-    panel.className = 'windchat-hidden';
-
-    // Panel header
-    var header = document.createElement('div');
-    header.id = 'windchat-header';
-    var headerText = document.createElement('div');
-    var brandDiv = document.createElement('div');
-    brandDiv.className = 'windchat-header-brand';
-    brandDiv.textContent = brandName;
-    var subtitleDiv = document.createElement('div');
-    subtitleDiv.className = 'windchat-header-subtitle';
-    subtitleDiv.textContent = brandSubtitle;
-    headerText.appendChild(brandDiv);
-    headerText.appendChild(subtitleDiv);
-    var closeBtn = document.createElement('button');
-    closeBtn.id = 'windchat-close';
-    closeBtn.setAttribute('aria-label', 'Zamknij czat');
-    closeBtn.textContent = '✕';
-    header.appendChild(headerText);
-    header.appendChild(closeBtn);
-
-    // Tabs
-    var tabs = document.createElement('div');
-    tabs.id = 'windchat-tabs';
-    var tabChat = document.createElement('button');
-    tabChat.className = 'windchat-tab windchat-tab-active';
-    tabChat.setAttribute('data-tab', 'chat');
-    tabChat.textContent = 'Czat';
-    var tabSpec = document.createElement('button');
-    tabSpec.className = 'windchat-tab';
-    tabSpec.setAttribute('data-tab', 'spec');
-    tabSpec.textContent = 'Spec';
-    var tabOffer = document.createElement('button');
-    tabOffer.className = 'windchat-tab';
-    tabOffer.setAttribute('data-tab', 'offer');
-    tabOffer.textContent = 'Oferta';
-    tabs.appendChild(tabChat);
-    tabs.appendChild(tabSpec);
-    tabs.appendChild(tabOffer);
-
-    // Chat tab content
-    var chatContent = document.createElement('div');
-    chatContent.id = 'windchat-chat-content';
-    chatContent.className = 'windchat-tab-content windchat-tab-active';
-    var messages = document.createElement('div');
-    messages.id = 'windchat-messages';
-    var composer = document.createElement('div');
-    composer.id = 'windchat-composer';
-    var input = document.createElement('textarea');
-    input.id = 'windchat-input';
-    input.setAttribute('rows', '1');
-    input.setAttribute('placeholder', 'Napisz wiadomość…');
-    var sendBtn = document.createElement('button');
-    sendBtn.id = 'windchat-send';
-    sendBtn.textContent = 'Wyślij';
-    composer.appendChild(input);
-    composer.appendChild(sendBtn);
-    chatContent.appendChild(messages);
-    chatContent.appendChild(composer);
-
-    // Spec tab content
-    var specContent = document.createElement('div');
-    specContent.id = 'windchat-spec-content';
-    specContent.className = 'windchat-tab-content';
-    var specHead = document.createElement('div');
-    specHead.className = 'windchat-form-head';
-    var specTitle = document.createElement('div');
-    specTitle.className = 'windchat-form-title';
-    specTitle.textContent = 'Pobierz Specyfikację Techniczną';
-    var specHelp = document.createElement('div');
-    specHelp.className = 'windchat-form-help';
-    specHelp.textContent = 'Otrzymaj szczegółowe specyfikacje techniczne dla Twojego projektu turbiny wiatrowej';
-    specHead.appendChild(specTitle);
-    specHead.appendChild(specHelp);
-    var specGrid = document.createElement('div');
-    specGrid.className = 'windchat-lead-grid';
-    var specName = document.createElement('input');
-    specName.id = 'windchat-spec-name';
-    specName.setAttribute('placeholder', 'Twoje Imię');
-    var specPhone = document.createElement('input');
-    specPhone.id = 'windchat-spec-phone';
-    specPhone.setAttribute('placeholder', 'Telefon (wymagane)');
-    specPhone.setAttribute('required', '');
-    var specEmail = document.createElement('input');
-    specEmail.id = 'windchat-spec-email';
-    specEmail.setAttribute('placeholder', 'Email (wymagane)');
-    specEmail.setAttribute('required', '');
-    specGrid.appendChild(specName);
-    specGrid.appendChild(specPhone);
-    specGrid.appendChild(specEmail);
-    var specConsent = document.createElement('label');
-    specConsent.className = 'windchat-consent';
-    var specConsChk = document.createElement('input');
-    specConsChk.id = 'windchat-spec-consent';
-    specConsChk.setAttribute('type', 'checkbox');
-    specConsChk.setAttribute('required', '');
-    var specConsText = document.createElement('span');
-    specConsText.innerHTML = 'Wyrażam zgodę na otrzymanie specyfikacji na moją skrzynkę email i akceptuję <a href="' + privacyUrl + '" class="windchat-link" target="_blank" rel="noopener noreferrer">politykę prywatności</a>';
-    specConsent.appendChild(specConsChk);
-    specConsent.appendChild(specConsText);
-    var specSubmit = document.createElement('button');
-    specSubmit.id = 'windchat-spec-submit';
-    specSubmit.className = 'windchat-form-submit';
-    specSubmit.setAttribute('type', 'button');
-    specSubmit.textContent = 'Pobierz Specyfikację';
-    specContent.appendChild(specHead);
-    specContent.appendChild(specGrid);
-    specContent.appendChild(specConsent);
-    specContent.appendChild(specSubmit);
-
-    // Offer tab content
-    var offerContent = document.createElement('div');
-    offerContent.id = 'windchat-offer-content';
-    offerContent.className = 'windchat-tab-content';
-    var offerHead = document.createElement('div');
-    offerHead.className = 'windchat-form-head';
-    var offerTitle = document.createElement('div');
-    offerTitle.className = 'windchat-form-title';
-    offerTitle.textContent = 'Poproś o Spersonalizowaną Ofertę';
-    var offerHelp = document.createElement('div');
-    offerHelp.className = 'windchat-form-help';
-    offerHelp.textContent = 'Opowiedz nam o swoim projekcie, otrzymaj spersonalizowaną ofertę';
-    offerHead.appendChild(offerTitle);
-    offerHead.appendChild(offerHelp);
-    var offerGrid = document.createElement('div');
-    offerGrid.className = 'windchat-lead-grid';
-    var offerName = document.createElement('input');
-    offerName.id = 'windchat-offer-name';
-    offerName.setAttribute('placeholder', 'Twoje Imię');
-    var offerPhone = document.createElement('input');
-    offerPhone.id = 'windchat-offer-phone';
-    offerPhone.setAttribute('placeholder', 'Telefon (wymagane)');
-    offerPhone.setAttribute('required', '');
-    var offerEmail = document.createElement('input');
-    offerEmail.id = 'windchat-offer-email';
-    offerEmail.setAttribute('placeholder', 'Email (wymagane)');
-    offerEmail.setAttribute('required', '');
-    offerGrid.appendChild(offerName);
-    offerGrid.appendChild(offerPhone);
-    offerGrid.appendChild(offerEmail);
-    var offerConsent = document.createElement('label');
-    offerConsent.className = 'windchat-consent';
-    var offerConsChk = document.createElement('input');
-    offerConsChk.id = 'windchat-offer-consent';
-    offerConsChk.setAttribute('type', 'checkbox');
-    offerConsChk.setAttribute('required', '');
-    var offerConsText = document.createElement('span');
-    offerConsText.innerHTML = 'Wyrażam zgodę na kontakt w sprawie mojej oferty i akceptuję <a href="' + privacyUrl + '" class="windchat-link" target="_blank" rel="noopener noreferrer">politykę prywatności</a>';
-    offerConsent.appendChild(offerConsChk);
-    offerConsent.appendChild(offerConsText);
-    var offerSubmit = document.createElement('button');
-    offerSubmit.id = 'windchat-offer-submit';
-    offerSubmit.className = 'windchat-form-submit';
-    offerSubmit.setAttribute('type', 'button');
-    offerSubmit.textContent = 'Poproś o Ofertę';
-    offerContent.appendChild(offerHead);
-    offerContent.appendChild(offerGrid);
-    offerContent.appendChild(offerConsent);
-    offerContent.appendChild(offerSubmit);
-
-    // Assemble panel
-    panel.appendChild(header);
-    panel.appendChild(tabs);
-    panel.appendChild(chatContent);
-    panel.appendChild(specContent);
-    panel.appendChild(offerContent);
-
-    // Assemble root
-    root.appendChild(floatingActions);
-    root.appendChild(panel);
-
-    document.body.appendChild(root);
+  // Helper Functions
+  function isEmail(s) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(s || '').trim());
   }
 
-  // ============================================
-  // EVENT HANDLERS
-  // ============================================
+  function isPhoneLikely(s) {
+    var v = String(s || '').replace(/\s+/g, '').replace(/[-()]/g, '');
+    return v.length >= 7;
+  }
 
+  function postJson(url, payload) {
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function (r) {
+      return r.json().then(function (j) {
+        if (!r.ok) {
+          var msg = (j && (j.error || j.message)) || ('HTTP ' + r.status);
+          throw new Error(msg);
+        }
+        return j;
+      });
+    });
+  }
+
+  // DOM Elements
+  var btnChat = document.getElementById('windchat-btn-chat');
+  var btnSpec = document.getElementById('windchat-btn-spec');
+  var btnOffer = document.getElementById('windchat-btn-offer');
+  var panel = document.getElementById('windchat-panel');
+  var close = document.getElementById('windchat-close');
+  var messages = document.getElementById('windchat-messages');
+  var input = document.getElementById('windchat-input');
+  var send = document.getElementById('windchat-send');
+
+  // Tab Switching
   function switchTab(tabName) {
     currentTab = tabName;
     
@@ -941,7 +802,6 @@
 
   function openPanel() {
     opened = true;
-    var panel = document.getElementById('windchat-panel');
     panel.classList.remove('windchat-hidden');
     panel.classList.add('open');
     
@@ -956,13 +816,36 @@
 
   function closePanel() {
     opened = false;
-    var panel = document.getElementById('windchat-panel');
     panel.classList.remove('open');
     panel.classList.add('windchat-hidden');
   }
 
+  // Button Listeners
+  btnChat.addEventListener('click', function () {
+    switchTab('chat');
+    openPanel();
+  });
+
+  btnSpec.addEventListener('click', function () {
+    switchTab('spec');
+    openPanel();
+  });
+
+  btnOffer.addEventListener('click', function () {
+    switchTab('offer');
+    openPanel();
+  });
+
+  document.querySelectorAll('.windchat-tab').forEach(function (tabBtn) {
+    tabBtn.addEventListener('click', function () {
+      switchTab(this.getAttribute('data-tab'));
+    });
+  });
+
+  close.addEventListener('click', closePanel);
+
+  // Messages
   function addMsg(role, text, meta) {
-    var messages = document.getElementById('windchat-messages');
     var row = document.createElement('div');
     row.className = 'windchat-msg windchat-' + role;
     
@@ -990,9 +873,7 @@
     var typing = addMsg('assistant', '', { typing: true });
     var sentAt = Date.now();
 
-    var sendBtn = document.getElementById('windchat-send');
-    sendBtn.disabled = true;
-    
+    send.disabled = true;
     postJson(apiBaseUrl + '/api/chat', {
       sessionId: sessionId,
       message: text,
@@ -1008,7 +889,7 @@
           } else {
             addMsg('assistant', r.message);
           }
-          sendBtn.disabled = false;
+          send.disabled = false;
         }, waitMs);
       })
       .catch(function (err) {
@@ -1021,191 +902,140 @@
           } else {
             addMsg('assistant', 'Błąd: ' + err.message);
           }
-          sendBtn.disabled = false;
+          send.disabled = false;
         }, waitMs);
       });
   }
 
-  // ============================================
-  // INITIALIZATION
-  // ============================================
+  send.addEventListener('click', function () {
+    var text = input.value.trim();
+    input.value = '';
+    sendMessage(text);
+  });
 
-  function init() {
-    // Inject styles
-    injectStyles();
-
-    // Create DOM
-    createDOM();
-
-    // Get references
-    var btnChat = document.getElementById('windchat-btn-chat');
-    var btnSpec = document.getElementById('windchat-btn-spec');
-    var btnOffer = document.getElementById('windchat-btn-offer');
-    var close = document.getElementById('windchat-close');
-    var input = document.getElementById('windchat-input');
-    var send = document.getElementById('windchat-send');
-
-    // Button listeners
-    btnChat.addEventListener('click', function () {
-      switchTab('chat');
-      openPanel();
-    });
-
-    btnSpec.addEventListener('click', function () {
-      switchTab('spec');
-      openPanel();
-    });
-
-    btnOffer.addEventListener('click', function () {
-      switchTab('offer');
-      openPanel();
-    });
-
-    document.querySelectorAll('.windchat-tab').forEach(function (tabBtn) {
-      tabBtn.addEventListener('click', function () {
-        switchTab(this.getAttribute('data-tab'));
-      });
-    });
-
-    close.addEventListener('click', closePanel);
-
-    // Chat input
-    send.addEventListener('click', function () {
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
       var text = input.value.trim();
       input.value = '';
       sendMessage(text);
-    });
+    }
+  });
 
-    input.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        var text = input.value.trim();
-        input.value = '';
-        sendMessage(text);
+  // SPEC FORM
+  var specSubmit = document.getElementById('windchat-spec-submit');
+  if (specSubmit) {
+    specSubmit.addEventListener('click', function () {
+      var name = document.getElementById('windchat-spec-name').value.trim();
+      var phone = document.getElementById('windchat-spec-phone').value.trim();
+      var email = document.getElementById('windchat-spec-email').value.trim();
+      var consent = document.getElementById('windchat-spec-consent').checked;
+
+      if (!email) {
+        addMsg('assistant', 'Email jest wymagany do wysłania specyfikacji.');
+        switchTab('chat');
+        return;
       }
+      if (!isEmail(email)) {
+        addMsg('assistant', 'Format emaila wygląda na niepoprawny.');
+        switchTab('chat');
+        return;
+      }
+      if (!consent) {
+        addMsg('assistant', 'Musisz wyrazić zgodę na politykę prywatności aby kontynuować.');
+        switchTab('chat');
+        return;
+      }
+
+      specSubmit.disabled = true;
+      specSubmit.textContent = 'Wysyłam…';
+
+      postJson(apiBaseUrl + '/api/send-spec', {
+        email: email,
+        name: name || undefined,
+        phone: phone || undefined,
+        sessionId: sessionId
+      })
+        .then(function () {
+          addMsg('assistant', 'Gotowe! Specyfikacja techniczna powinna dotrzeć na Twój email (sprawdź też folder SPAM).');
+          switchTab('chat');
+          document.getElementById('windchat-spec-name').value = '';
+          document.getElementById('windchat-spec-phone').value = '';
+          document.getElementById('windchat-spec-email').value = '';
+          document.getElementById('windchat-spec-consent').checked = false;
+        })
+        .catch(function (err) {
+          addMsg('assistant', 'Nie udało się wysłać: ' + err.message);
+          switchTab('chat');
+        })
+        .finally(function () {
+          specSubmit.disabled = false;
+          specSubmit.textContent = 'Pobierz Specyfikację';
+        });
     });
-
-    // Spec form
-    var specSubmit = document.getElementById('windchat-spec-submit');
-    if (specSubmit) {
-      specSubmit.addEventListener('click', function () {
-        var name = document.getElementById('windchat-spec-name').value.trim();
-        var phone = document.getElementById('windchat-spec-phone').value.trim();
-        var email = document.getElementById('windchat-spec-email').value.trim();
-        var consent = document.getElementById('windchat-spec-consent').checked;
-
-        if (!email) {
-          addMsg('assistant', 'Email jest wymagany do wysłania specyfikacji.');
-          switchTab('chat');
-          return;
-        }
-        if (!isEmail(email)) {
-          addMsg('assistant', 'Format emaila wygląda na niepoprawny.');
-          switchTab('chat');
-          return;
-        }
-        if (!consent) {
-          addMsg('assistant', 'Musisz wyrazić zgodę na politykę prywatności aby kontynuować.');
-          switchTab('chat');
-          return;
-        }
-
-        specSubmit.disabled = true;
-        specSubmit.textContent = 'Wysyłam…';
-
-        postJson(apiBaseUrl + '/api/send-spec', {
-          email: email,
-          name: name || undefined,
-          phone: phone || undefined,
-          sessionId: sessionId
-        })
-          .then(function () {
-            addMsg('assistant', 'Gotowe! Specyfikacja techniczna powinna dotrzeć na Twój email (sprawdź też folder SPAM).');
-            switchTab('chat');
-            document.getElementById('windchat-spec-name').value = '';
-            document.getElementById('windchat-spec-phone').value = '';
-            document.getElementById('windchat-spec-email').value = '';
-            document.getElementById('windchat-spec-consent').checked = false;
-          })
-          .catch(function (err) {
-            addMsg('assistant', 'Nie udało się wysłać: ' + err.message);
-            switchTab('chat');
-          })
-          .finally(function () {
-            specSubmit.disabled = false;
-            specSubmit.textContent = 'Pobierz Specyfikację';
-          });
-      });
-    }
-
-    // Offer form
-    var offerSubmit = document.getElementById('windchat-offer-submit');
-    if (offerSubmit) {
-      offerSubmit.addEventListener('click', function () {
-        var name = document.getElementById('windchat-offer-name').value.trim();
-        var phone = document.getElementById('windchat-offer-phone').value.trim();
-        var email = document.getElementById('windchat-offer-email').value.trim();
-        var consent = document.getElementById('windchat-offer-consent').checked;
-
-        if (!consent) {
-          addMsg('assistant', 'Musisz wyrazić zgodę na kontakt aby kontynuować żądanie oferty.');
-          switchTab('chat');
-          return;
-        }
-
-        if (!phone || !email) {
-          addMsg('assistant', 'Podaj telefon i email – oba są wymagane.');
-          switchTab('chat');
-          return;
-        }
-
-        if (!isEmail(email)) {
-          addMsg('assistant', 'Format emaila wygląda na niepoprawny.');
-          switchTab('chat');
-          return;
-        }
-
-        if (!isPhoneLikely(phone)) {
-          addMsg('assistant', 'Podaj proszę pełny numer telefonu.');
-          switchTab('chat');
-          return;
-        }
-
-        offerSubmit.disabled = true;
-        offerSubmit.textContent = 'Wysyłam…';
-
-        postJson(apiBaseUrl + '/api/leads', {
-          sessionId: sessionId,
-          name: name || undefined,
-          phone: phone,
-          email: email,
-          wantsAdvisorContact: true,
-          pageUrl: window.location.href
-        })
-          .then(function () {
-            addMsg('assistant', 'Dziękuję! Doradca skontaktuje się z Tobą wkrótce.');
-            switchTab('chat');
-            document.getElementById('windchat-offer-name').value = '';
-            document.getElementById('windchat-offer-phone').value = '';
-            document.getElementById('windchat-offer-email').value = '';
-            document.getElementById('windchat-offer-consent').checked = false;
-          })
-          .catch(function (err) {
-            addMsg('assistant', 'Nie udało się wysłać: ' + err.message);
-            switchTab('chat');
-          })
-          .finally(function () {
-            offerSubmit.disabled = false;
-            offerSubmit.textContent = 'Poproś o Ofertę';
-          });
-      });
-    }
   }
 
-  // Start when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
+  // OFFER FORM
+  var offerSubmit = document.getElementById('windchat-offer-submit');
+  if (offerSubmit) {
+    offerSubmit.addEventListener('click', function () {
+      var name = document.getElementById('windchat-offer-name').value.trim();
+      var phone = document.getElementById('windchat-offer-phone').value.trim();
+      var email = document.getElementById('windchat-offer-email').value.trim();
+      var consent = document.getElementById('windchat-offer-consent').checked;
+
+      if (!consent) {
+        addMsg('assistant', 'Musisz wyrazić zgodę na kontakt aby kontynuować żądanie oferty.');
+        switchTab('chat');
+        return;
+      }
+
+      if (!phone || !email) {
+        addMsg('assistant', 'Podaj telefon i email – oba są wymagane.');
+        switchTab('chat');
+        return;
+      }
+
+      if (!isEmail(email)) {
+        addMsg('assistant', 'Format emaila wygląda na niepoprawny.');
+        switchTab('chat');
+        return;
+      }
+
+      if (!isPhoneLikely(phone)) {
+        addMsg('assistant', 'Podaj proszę pełny numer telefonu.');
+        switchTab('chat');
+        return;
+      }
+
+      offerSubmit.disabled = true;
+      offerSubmit.textContent = 'Wysyłam…';
+
+      postJson(apiBaseUrl + '/api/leads', {
+        sessionId: sessionId,
+        name: name || undefined,
+        phone: phone,
+        email: email,
+        wantsAdvisorContact: true,
+        pageUrl: window.location.href
+      })
+        .then(function () {
+          addMsg('assistant', 'Dziękuję! Doradca skontaktuje się z Tobą wkrótce.');
+          switchTab('chat');
+          document.getElementById('windchat-offer-name').value = '';
+          document.getElementById('windchat-offer-phone').value = '';
+          document.getElementById('windchat-offer-email').value = '';
+          document.getElementById('windchat-offer-consent').checked = false;
+        })
+        .catch(function (err) {
+          addMsg('assistant', 'Nie udało się wysłać: ' + err.message);
+          switchTab('chat');
+        })
+        .finally(function () {
+          offerSubmit.disabled = false;
+          offerSubmit.textContent = 'Poproś o Ofertę';
+        });
+    });
   }
 })();
+</script>
